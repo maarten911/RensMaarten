@@ -18,13 +18,12 @@ def add_features(df):
 
 
 def add_entry_signal(row):
-    rsi_threshold = 20
+    rsi_threshold = 40
+    stoch_rsi_threshold = 15
+    stoch_threshold = 30
 
     # If oversold:
-    if row["rsi"] < rsi_threshold:
-        return -1
-    # If overbought
-    elif row["rsi"] > 100 - rsi_threshold:
+    if (row["rsi"] < rsi_threshold) and (row["stoch_rsi"] < stoch_rsi_threshold):
         return 1
     # Else
     else:
@@ -57,14 +56,14 @@ def perform_backtest(df):
     stop_loss_pct = 4/100
     position = 0
     profit = 0
-    spread_pct = 0.75/100
+    spread_pct = 0.075/100
 
     for ix in df.index:
         if position == 0:
             if df.loc[ix]["entry"] == 1:
                 position = 1
                 open_price = df.loc[ix]["o"]
-                print(f"Open long: {df.loc[ix]['d']} at open_price")
+                print(f"Open long: {df.loc[ix]['d']} at {open_price}")
 
                 # Check if we can close already (we open at opening bar,so we have a h/l to process)
                 profit_update, close_price = check_exit(df.loc[ix], open_price, take_profit_pct, stop_loss_pct, spread_pct)
@@ -79,7 +78,7 @@ def perform_backtest(df):
             if profit_update != 0:
                 profit += profit_update
                 position = 0
-                print(f"Close long at {close_price}. Trade profit: {profit_update}. Total profit: {profit}\n")
+                print(f"Close long: {df.loc[ix]['d']} {close_price}. Trade profit: {profit_update}. Total profit: {profit}\n")
         # Short not implemented
         elif position < 0:
             print("Not implemented")
@@ -100,5 +99,3 @@ df_val = df[(df["d"] > cutoff_date) & (df["d"] < max_date)].reset_index(drop=Tru
 
 # Perform backtest
 perform_backtest(df_train)
-print(df_train)
-print(df_val)

@@ -42,4 +42,4 @@ for market in markets:
     # Process
     df = pd.concat(df_list, axis=0).reset_index(drop=True)
     df.sort_values("d")
-    df.to_csv(f"{market}.csv",index=False)
+    df.to_csv(f"{market}.csv", index=False)
