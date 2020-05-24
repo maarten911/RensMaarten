@@ -14,7 +14,7 @@ def get_rsi(df, period=15):
     return rsi
 
 
-def get_stoch_rsi(series, period=14, smoothK=3, smoothD=3):
+def get_stoch_rsi(series, period=14):
     # Calculate RSI
     delta = series.diff().dropna()
     ups = delta * 0
@@ -30,12 +30,16 @@ def get_stoch_rsi(series, period=14, smoothK=3, smoothD=3):
     rsi = 100 - 100 / (1 + rs)
 
     # Calculate StochRSI
-    stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
-    stochrsi_K = stochrsi.rolling(smoothK).mean()
-    stochrsi_D = stochrsi_K.rolling(smoothD).mean()
+    stochrsi  = 100*(rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
 
     return stochrsi
 
 
-def add_stoch_rsi(df):
-    None
+def get_stoch(df, period):
+    df['L14'] = df['l'].rolling(window=period).min()
+    # Create the "H14" column in the DataFrame
+    df['H14'] = df['h'].rolling(window=period).max()
+    # Create the "%K" column in the DataFrame
+    df["stoch"] = 100 * ((df['c'] - df['L14']) / (df['H14'] - df['L14']))
+
+    return df["stoch"]
