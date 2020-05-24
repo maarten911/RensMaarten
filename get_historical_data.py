@@ -1,7 +1,6 @@
 import pandas as pd
 import requests
 import time
-from utils import date_to_milliseconds
 from datetime import datetime
 pd.set_option("display.max_columns", 99)
 
@@ -18,9 +17,10 @@ tick_interval = '30m'
 market_to_df = {}
 
 for market in markets:
+    print(f"Getting data for {market}\n")
     end_time = int(time.time() * 1000)
     df_list = []
-    for i in range(50):
+    for i in range(5):
         # Update dates
         start_time = int((end_time / 1000 - 30 * 500 * 60) * 1000)
         print(datetime.utcfromtimestamp(start_time / 1000), datetime.utcfromtimestamp(end_time / 1000))
@@ -38,7 +38,7 @@ for market in markets:
         df["d"] = df["d"].apply(lambda x: datetime.utcfromtimestamp(x/1000).strftime('%Y-%m-%d %H:%M:%S'))
         df_list += [df]
 
-        end_time =start_time
+        end_time = start_time
     # Process
     df = pd.concat(df_list, axis=0).reset_index(drop=True)
     df.sort_values("d")
