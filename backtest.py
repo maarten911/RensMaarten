@@ -44,7 +44,7 @@ def add_features(df):
     return df
 
 
-def add_entry_signal(row):
+def add_entry_signal(row, market):
     rsi_threshold = 40
     stoch_rsi_threshold = 15
     stoch_threshold = 30
@@ -53,7 +53,7 @@ def add_entry_signal(row):
     if (row["rsi_f"] < rsi_threshold) and (row["stoch_rsi"] < stoch_rsi_threshold) and (row["stoch"] < stoch_threshold) and (row["ma_fast"] > row["ma_slow"]):
         return 1
     # Else
-    elif (row["rsi_f"] > 100 - rsi_threshold) and (row["stoch_rsi"] > 100 -  stoch_rsi_threshold) and (row["stoch"] > 100 - stoch_threshold) and (row["ma_fast"] < row["ma_slow"]):
+    elif ("BTC" in market) and (row["rsi_f"] > 100 - rsi_threshold) and (row["stoch_rsi"] > 100 -  stoch_rsi_threshold) and (row["stoch"] > 100 - stoch_threshold) and (row["ma_fast"] < row["ma_slow"]):
         return  -1
     else:
         return 0
@@ -163,8 +163,10 @@ def perform_backtest(df, market):
     plt.figure()
     plt.plot(trade_dates, profit_list)
     plt.grid()
-    plt.savefig(f"output/{market}.png")
     plt.xticks(rotation=90)
+    plt.title(market)
+    plt.tight_layout()
+    plt.savefig(f"output/{market}.png")
 
     # return data to later aggregate
     return profit_update_list, trade_dates
@@ -175,15 +177,13 @@ if not os.path.exists("output"):
 
 # Define pairs to backtest
 markets = ["BTCUSDT",
-           # "NANOUSDT",
-           # "NEOUSDT",
-           # "XMRUSDT",
-           # "XRPUSDT",
-           # "BTCUSDT",
+           "NANOUSDT",
+           "NEOUSDT",
+           "XMRUSDT",
+           "XRPUSDT",
+           "BTCUSDT",
            "ETHUSDT",
            ]
-
-
 
 all_trade_dates = []
 all_profits = []
@@ -200,7 +200,7 @@ for market in markets:
 
     # Create train test_split
     cutoff_date = pd.to_datetime("2010-01-01 00:00:00")
-    max_date = pd.to_datetime("2019-04-01 00:00:00")
+    max_date = pd.to_datetime("2021-01-01 00:00:00")
     # df_train = df[df["d"] <= cutoff_date].reset_index(drop=True)
     df_val = df[(df["d"] > cutoff_date) & (df["d"] < max_date)].reset_index(drop=True)
 
