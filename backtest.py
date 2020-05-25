@@ -44,7 +44,7 @@ def add_features(df):
     return df
 
 
-def add_entry_signal(row, market):
+def add_entry_signal(row):
     rsi_threshold = 40
     stoch_rsi_threshold = 15
     stoch_threshold = 30
@@ -53,7 +53,7 @@ def add_entry_signal(row, market):
     if (row["rsi_f"] < rsi_threshold) and (row["stoch_rsi"] < stoch_rsi_threshold) and (row["stoch"] < stoch_threshold) and (row["ma_fast"] > row["ma_slow"]):
         return 1
     # Else
-    elif ("BTC" in market) and (row["rsi_f"] > 100 - rsi_threshold) and (row["stoch_rsi"] > 100 -  stoch_rsi_threshold) and (row["stoch"] > 100 - stoch_threshold) and (row["ma_fast"] < row["ma_slow"]):
+    elif ("BTC" in row["market"]) and (row["rsi_f"] > 100 - rsi_threshold) and (row["stoch_rsi"] > 100 -  stoch_rsi_threshold) and (row["stoch"] > 100 - stoch_threshold) and (row["ma_fast"] < row["ma_slow"]):
         return  -1
     else:
         return 0
@@ -73,6 +73,7 @@ def check_exit_long(row, open_price, take_profit_pct, stop_loss_pct, spread_pct)
         temp_profit = -(stop_loss_pct + 2*spread_pct)
         close_price = round(open_price*(1-stop_loss_pct), 4)
     return temp_profit, close_price
+
 
 def check_exit_short(row, open_price, take_profit_pct, stop_loss_pct, spread_pct):
     return_high = (open_price/row["h"]) - 1 # stop loss
@@ -196,6 +197,7 @@ for market in markets:
     df = df.sort_values("d").reset_index(drop=True)
     df = add_features(df)
     df["d"] = pd.to_datetime(df["d"])
+    df["market"] = market
     df["entry"] = df.apply(add_entry_signal, axis=1).shift(1)
 
     # Create train test_split
